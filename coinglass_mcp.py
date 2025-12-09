@@ -5,7 +5,7 @@ import httpx
 from fastmcp import FastMCP
 
 # This object is what FastMCP Cloud will expose
-mcp = FastMCP(name="CoinGlass Proxy")
+app = FastMCP(name="CoinGlass Proxy")
 
 BASE_URL = "https://open-api-v4.coinglass.com"
 API_KEY_ENV = "COINGLASS_API_KEY"
