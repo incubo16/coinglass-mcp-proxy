@@ -43,23 +43,18 @@ async def _coinglass_get(
     path: str,
     params: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """
-    Low-level helper for GET requests to CoinGlass.
-    """
     if not path.startswith("/"):
         path = "/" + path
 
     url = BASE_URL + path
     headers = {
         "Accept": "application/json",
-        # Per CoinGlass docs the API key is sent in this header
-        "coinglassSecret": _get_api_key(),
+        "CG-API-KEY": _get_api_key(),   # ← changed here
     }
 
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.get(url, headers=headers, params=params)
 
-    # Raise on HTTP-level issues (e.g. 401, 429, 500)
     try:
         resp.raise_for_status()
     except httpx.HTTPStatusError as e:
@@ -69,7 +64,6 @@ async def _coinglass_get(
 
     data = resp.json()
 
-    # Many CoinGlass endpoints wrap the result as {"code": 0, "data": ...}
     if isinstance(data, dict) and "code" in data and data.get("code") not in (0, "0"):
         raise RuntimeError(
             f"CoinGlass API error: code={data.get('code')} msg={data.get('msg')}"
