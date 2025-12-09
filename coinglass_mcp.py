@@ -4,16 +4,14 @@ from typing import Any, Dict, Optional
 import httpx
 from fastmcp import FastMCP
 
-# Name that will show up in ChatGPT
+# This object is what FastMCP Cloud will expose
 mcp = FastMCP(name="CoinGlass Proxy")
-
 
 BASE_URL = "https://open-api-v4.coinglass.com"
 API_KEY_ENV = "COINGLASS_API_KEY"
 
 
 def _get_api_key() -> str:
-    """Read API key from environment; fail clearly if missing."""
     key = os.getenv(API_KEY_ENV)
     if not key:
         raise RuntimeError(
@@ -23,10 +21,10 @@ def _get_api_key() -> str:
     return key
 
 
-async def _coinglass_get(path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """
-    Helper to call CoinGlass REST API and return JSON.
-    """
+async def _coinglass_get(
+    path: str,
+    params: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     headers = {"CG-API-KEY": _get_api_key()}
     url = BASE_URL + path
 
@@ -46,12 +44,6 @@ async def _coinglass_get(path: str, params: Optional[Dict[str, Any]] = None) -> 
 async def futures_open_interest_exchange_list(symbol: str = "BTC") -> Dict[str, Any]:
     """
     Get futures open interest across exchanges for a coin.
-
-    Args:
-        symbol: Token symbol, e.g. "BTC", "ETH", "SOL".
-
-    Returns:
-        Raw JSON from CoinGlass /api/futures/open-interest/exchange-list.
     """
     return await _coinglass_get(
         "/api/futures/open-interest/exchange-list",
@@ -63,12 +55,6 @@ async def futures_open_interest_exchange_list(symbol: str = "BTC") -> Dict[str, 
 async def funding_rate_exchange_list(symbol: str = "BTC") -> Dict[str, Any]:
     """
     Get current funding rates across futures exchanges for a coin.
-
-    Args:
-        symbol: Token symbol, e.g. "BTC", "ETH", "SOL".
-
-    Returns:
-        Raw JSON from CoinGlass /api/futures/funding-rate/exchange-list.
     """
     return await _coinglass_get(
         "/api/futures/funding-rate/exchange-list",
@@ -80,12 +66,6 @@ async def funding_rate_exchange_list(symbol: str = "BTC") -> Dict[str, Any]:
 async def btc_etf_flows_history(limit: int = 30) -> Dict[str, Any]:
     """
     Get recent Bitcoin ETF flows history.
-
-    Args:
-        limit: How many days of history to fetch (CoinGlass max depends on your plan).
-
-    Returns:
-        Raw JSON from CoinGlass /api/etf/btc/flows/history.
     """
     return await _coinglass_get(
         "/api/etf/btc/flows/history",
@@ -94,5 +74,5 @@ async def btc_etf_flows_history(limit: int = 30) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    # For local dev; FastMCP Cloud overrides this when running in HTTP mode.
+    # Local dev only; FastMCP Cloud overrides this.
     mcp.run()
